@@ -10,4 +10,8 @@ public class ChatClientImpl extends UnicastRemoteObject implements ChatClient {
     public void receiveMessage(Message message) throws RemoteException {
         System.out.println(message);
     }
+    @Override 
+    public String getName(String name) {
+    	return name;
+    }
 }
