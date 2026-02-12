@@ -2,34 +2,38 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.io.*;
 
 
 public class ChatServerImpl implements ChatServer {
     private final Map<Integer, ChatClient>activeClients = new HashMap();
-	public synchronized List<UserList> getActiveUsers() throws RemoteException{
+	
+    public synchronized List<UserList> getActiveUsers() throws RemoteException{
 		return Database.getActiveusers();
 	}
+    
 	
 	@Override
     public synchronized void sendMessage(int senderId, Integer receiverId,Integer groupId, String content)
             throws RemoteException {
     	// select * from message where client ID is same 
        Database.insertMessage(senderId,receiverId,groupId,content);
+       Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+       Message message = new Message(senderId,receiverId,content,timestamp);
+       
        ChatClient reciveClient = activeClients.get(receiverId);
        if(reciveClient != null) {
-    	   try {
-    		   Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
-    		   Message message = new Message(senderId,receiverId,content,timestamp);
+    	  
+    		  // Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+    		  // Message message = new Message(senderId,receiverId,content,timestamp);
     		   reciveClient.receiveMessage(message);
     	   }
-    	   catch(RemoteException e) {
-    		   e.printStackTrace();
-    	   }
+    	  System.out.println("sent From" + senderId + "to" + receiverId + "Message" + content);
+    	  //System.out.println("Message send");
        }
        
-       System.out.print("Message send....");
-    }
+    
+
+
 	
 	public synchronized int registerClient(String username, String password, ChatClient client) throws RemoteException {
 		//private Map<Integer,client> activeClients = new HashMap<>();
@@ -43,7 +47,16 @@ public class ChatServerImpl implements ChatServer {
 		
 	}
 	
-	
+	public boolean loginUser(String username,String password, ChatClient client) {
+		boolean info = Database.userLogin(username, password);
+		if(info) {
+			int userId = Database.getUserId(username);
+			activeClients.put(userId, client);
+		}
+		
+		return info;
+		
+	}
     //private final Map<String, ChatClient> clients = new HashMap<>();
     //private final List<Message> history = new ArrayList<>();
     //private static final String HISTORY_FILE = "history.ser";

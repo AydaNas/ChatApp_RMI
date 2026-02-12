@@ -1,0 +1,212 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Database{
+	public static final String dbName = "jdbc:h2:~/Documents/DatabaseRMINew";
+	public static final String userName = "Rmi";
+	public static final String Dbpassword = "";
+	public static Connection connection = null;
+	public static PreparedStatement prepared;
+	
+	//CREATING DATABASE
+    public static void databaseCreation() throws Exception {
+      try {
+    	  Connection connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+    	  Statement stat= connection.createStatement();
+    	  stat.execute("""
+    	  		CREATE TABLE IF NOT EXISTS users(
+    	  		userId INT AUTO_INCREMENT PRIMARY KEY,
+    	  		userName VARCHAR(50) NOT NULL,
+    	  		password VARCHAR(50) NOT NULL)
+    	  		
+    	  		""");
+
+    	stat.execute("""
+    			CREATE TABLE IF NOT EXISTS messages(
+    			messageId INT AUTO_INCREMENT PRIMARY KEY,
+    			senderId INT NOT NULL,
+    			receiverId INT,
+    			groupId INT,
+    			content TEXT NOT NULL,
+    			timeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+    			"""); 
+    	
+    	stat.execute("""     			
+    			  CREATE TABLE IF NOT EXISTS groups( 
+                  groupId INT AUTO_INCREMENT PRIMARY KEY,
+                  groupName VARCHAR(50) NOT NULL)
+    			""");
+    	
+    	stat.execute("""
+    			CREATE TABLE IF NOT EXISTS groupMembers(
+    			groupId INT NOT NULL,
+    			userId INT NOT NULL,
+    			PRIMARY KEY(groupId, userId))
+    			""");
+    	
+    	System.out.println("Database table created successfully");
+    	connection.close();
+      }
+      catch (Exception e) {
+    	  e.printStackTrace();
+      }
+    }
+    
+    //Registering user to the database
+    public static int registerClient(String username,String password) {
+    	
+    	int userId = -1;
+    	try {
+    		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+    		String insertsql = "INSERT INTO users(userName,password)VALUES(?,?)";
+    		prepared = connection.prepareStatement(insertsql,Statement.RETURN_GENERATED_KEYS);		    
+    		prepared.setString(1,username);
+    		prepared.setString(2, password);
+    		prepared.executeUpdate();
+    		
+    		ResultSet resultset= prepared.getGeneratedKeys();
+    		if(resultset.next()) {
+    			userId = resultset.getInt(1);
+    		}
+    		
+    		//System.out.print("You have been registered in the database");
+    	
+    	}
+    	catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return userId;
+    }
+    
+    
+  //login confirmation 
+    public static boolean userLogin(String inputUsername, String inputPassword){
+    	String query = "SELECT userID,userName,password FROM users WHERE username = ? AND password = ?";
+    	try {
+    		Connection connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+    		PreparedStatement preparedstatement = connection.prepareStatement(query);
+    		preparedstatement.setString(1, inputUsername);
+    		preparedstatement.setString(2, inputPassword);
+    		ResultSet result = preparedstatement.executeQuery();
+    		
+    		return result.next();
+    	
+    	}
+    	 catch (SQLException e) {
+    	    	e.printStackTrace();
+    	    	return false;
+    	    }
+    }
+    
+    
+    
+    
+        //Get active users 
+    public static List<UserList> getActiveusers() {
+    	
+    	List<UserList> users = new ArrayList<>();
+    	try {
+    			
+    			Connection connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+    			Statement stmt = connection.createStatement();
+    			ResultSet rs = stmt.executeQuery("SELECT userID, userName FROM users");
+    			
+    					while (rs.next()) {
+    						int id = rs.getInt("userId");
+    						String name = rs.getString("userName");
+    						users.add(new UserList(id,name));
+    					}
+    					
+    }
+    catch (SQLException e) {
+    	e.printStackTrace();
+    }
+    	
+    	System.out.print("list of active users");
+		return users;
+}
+    
+    
+    
+    
+ 
+          
+    
+    //INSERTING MESSAGE IN TO THE DATABASE
+    public static void insertMessage(int senderId, Integer receiverId , Integer groupId, String content) {
+    	Timestamp timestamp =new Timestamp (System.currentTimeMillis());
+    
+		try {
+			connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+		
+    	String insertsql = "INSERT INTO messages(senderId,receiverId , content, timeStamp) VALUES (?,?,?,?)";
+    	
+		prepared = connection.prepareStatement(insertsql);		    
+		prepared.setInt(1, senderId);	
+       	prepared.setInt(2, receiverId != null ? receiverId : 0);
+       	prepared.setInt(3, groupId != null ? groupId : 0);
+    	prepared.setString(4, content);
+    	prepared.setTimestamp(5, timestamp);
+    	prepared.executeUpdate();
+    }
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
+    
+    public static List<Message> getMessagesForUser(int userId){
+    	List<Message> messages = new ArrayList<>();
+    	try {
+    		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+    	    String query = "SELECT senderId, receiverId, content, timeStamp FROM messages WHERE receiverId = ?";
+    		prepared = connection.prepareStatement(query);
+    		prepared.setInt(1, userId);
+    		ResultSet result= prepared.executeQuery();
+    		while(result.next()) {
+    			int senderId = result.getInt("senderId");
+    			int receiverId = result.getInt("receiverId");
+    			String content = result.getString("content");
+    			Timestamp timestamp = result.getTimestamp("timeStamp"); 
+    			messages.add(new Message(senderId,receiverId,content,timestamp));
+    		}
+    	}
+    		catch(SQLException e) {
+    			e.printStackTrace();
+    		}
+    		return messages;
+    	
+    	
+    	  
+    }
+    
+    
+   public static int getUserId(String username) {
+	   String query = "SELECT userId FROM users WHERE username = ?";
+	   try{
+			   Connection connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+			   PreparedStatement preparedstatement = connection.prepareStatement(query);
+			   preparedstatement.setString(1, username);
+			   ResultSet result = preparedstatement.executeQuery();
+			   if(result.next()) {
+				   return result.getInt("userId");
+			   }
+			   
+	   
+   }
+   catch(SQLException e) {
+	   e.printStackTrace();
+   }
+   return -1;
+   }
+}
+    
