@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,12 +147,13 @@ public class Database{
 		try {
 			connection = DriverManager.getConnection(dbName,userName,Dbpassword);
 		
-    	String insertsql = "INSERT INTO messages(senderId,receiverId , content, timeStamp) VALUES (?,?,?,?)";
+    	String insertsql = "INSERT INTO messages(senderId, receiverId, groupId, content, timeStamp) VALUES (?,?,?,?,?)";
+
     	
 		prepared = connection.prepareStatement(insertsql);		    
 		prepared.setInt(1, senderId);	
-       	prepared.setInt(2, receiverId != null ? receiverId : 0);
-       	prepared.setInt(3, groupId != null ? groupId : 0);
+       	prepared.setObject(2, receiverId, java.sql.Types.INTEGER);
+       	prepared.setObject(3, groupId, java.sql.Types.INTEGER);
     	prepared.setString(4, content);
     	prepared.setTimestamp(5, timestamp);
     	prepared.executeUpdate();
@@ -163,14 +163,22 @@ public class Database{
 			e.printStackTrace();
 		}
 		}
-    
+
+
+    //get message for the user as history
     public static List<Message> getMessagesForUser(int userId){
     	List<Message> messages = new ArrayList<>();
     	try {
     		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
-    	    String query = "SELECT senderId, receiverId, content, timeStamp FROM messages WHERE receiverId = ?";
+    	    String query = "SELECT senderId, receiverId, content, timeStamp " +
+               "FROM messages " +
+               "WHERE (senderId = ? OR receiverId = ?) AND (groupId IS NULL )"+ 
+               "ORDER BY timeStamp ASC";
+
     		prepared = connection.prepareStatement(query);
     		prepared.setInt(1, userId);
+			prepared.setInt(2,userId);
+
     		ResultSet result= prepared.executeQuery();
     		while(result.next()) {
     			int senderId = result.getInt("senderId");

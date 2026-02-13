@@ -21,8 +21,7 @@ public class ClientMain {
        
         while(true) {
         	if(!loogedIn) {
-        		client.printReceivedMessages();
-        		
+        		client.printReceivedMessages();       		
         		
         		System.out.println("Select your options");
         		System.out.println("1 Register");
@@ -36,7 +35,7 @@ public class ClientMain {
         		   
                 //login and connection
              	   case 1:
-             		   input.nextLine();
+             		   
              		   System.out.println("Username: ");
              		   String userName = input.nextLine();
 
@@ -50,7 +49,7 @@ public class ClientMain {
                         
                    //login
              	   case 2: 
-             		   input.nextLine();
+             		   
              		   System.out.println("Login");
              		   System.out.println("UserName:");
              		   String loginusername = input.nextLine();
@@ -85,7 +84,8 @@ public class ClientMain {
         		System.out.println("2 Create Group");
         		System.out.println("3 Join Group");
         		System.out.println("4 Leave Group");
-        		System.out.println("5 Logout");
+				System.out.println("5 Show History");
+				System.out.println("6 Logout");
         		
         		int choose = input.nextInt();
         		input.nextLine();
@@ -93,7 +93,7 @@ public class ClientMain {
         		switch(choose) {
         		//send Message     
          	   case 1:
-         		   input.nextLine();
+         		
          		   System.out.println("Active Users");
                     
                     List<UserList> users = server.getActiveUsers();
@@ -138,7 +138,7 @@ public class ClientMain {
                  	   input.nextLine();
                  	   
                  	   UserList groupselectedUser = null;
-                 	   for(UserList u:activeusers) {
+					   for(UserList u:activeusers) {
                  		   if(u.getUserId() == groupselection) {
                  			   groupselectedUser = u;
                  			   break;
@@ -159,9 +159,21 @@ public class ClientMain {
                     
          	   case 3:break;
          	   case 4: break;
-         	   case 5: 
+			   case 5: 
+			   System.out.println("Chat History");
+			   List<Message> history = server.chatHistory(client.getUserId());
+
+			    for(Message m : history){
+					System.out.println("("+m.getTimestamp()+")From"+
+					m.getSender()+"To"+
+					m.getReceiverId()+"Message"+
+					m.getContent());
+				}
+			   break;
+         	   case 6: 
          		   System.out.println("Logging out");
-         		   loogedIn = false;
+         		   server.logoutUser(client.getUserId());
+				   loogedIn = false;
          		   break;
             
          	  default:

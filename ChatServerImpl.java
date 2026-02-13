@@ -10,7 +10,10 @@ public class ChatServerImpl implements ChatServer {
     public synchronized List<UserList> getActiveUsers() throws RemoteException{
 		return Database.getActiveusers();
 	}
-    
+    @Override
+	public void logoutUser(int userId) throws RemoteException{
+		activeClients.remove(userId);
+	}
 	
 	@Override
     public synchronized void sendMessage(int senderId, Integer receiverId,Integer groupId, String content)
@@ -52,11 +55,33 @@ public class ChatServerImpl implements ChatServer {
 		if(info) {
 			int userId = Database.getUserId(username);
 			activeClients.put(userId, client);
-		}
+		
+		List<Message> pendingMessages = Database.getMessagesForUser(userId);
+		for(Message m : pendingMessages){
+			try{
+				client.receiveMessage(m);
+			}
+			catch(RemoteException e){
+							
+               e.printStackTrace();
+ 			}
+
+			}
+			}
+		
+		
 		
 		return info;
 		
 	}
+
+
+	@Override
+	 public List<Message> chatHistory(int userId) {
+		return Database.getMessagesForUser(userId);
+		
+
+	 }
     //private final Map<String, ChatClient> clients = new HashMap<>();
     //private final List<Message> history = new ArrayList<>();
     //private static final String HISTORY_FILE = "history.ser";
