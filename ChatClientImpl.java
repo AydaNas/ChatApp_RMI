@@ -42,4 +42,3 @@ public class ChatClientImpl extends UnicastRemoteObject implements ChatClient {
     
     
 
-

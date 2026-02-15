@@ -6,6 +6,10 @@ import java.util.*;
 
 public class ChatServerImpl implements ChatServer {
     private final Map<Integer, ChatClient>activeClients = new HashMap();
+
+	// public ChatServerImpl() throws RemoteException {
+    //     super(8082);  // let RMI manage properly
+    // }
 	
     public synchronized List<UserList> getActiveUsers() throws RemoteException{
 		return Database.getActiveusers();
@@ -82,8 +86,10 @@ public class ChatServerImpl implements ChatServer {
 		
 
 	 }
-    //private final Map<String, ChatClient> clients = new HashMap<>();
-    //private final List<Message> history = new ArrayList<>();
+
+
+    private final Map<String, ChatClient> clients = new HashMap<>();
+    private final List<Message> history = new ArrayList<>();
     //private static final String HISTORY_FILE = "history.ser";
 
 //    public ChatServerImpl() throws RemoteException {
@@ -92,13 +98,19 @@ public class ChatServerImpl implements ChatServer {
 //    
 //    
 //
-//    @Override
-//    public synchronized void join(String username, ChatClient client)
-//            throws RemoteException {
-//    	// insert client in to the group table here 
-//        clients.put(username, client);
-//        broadcast(new Message("Server", username + " joined the chat"));
-//    }
+@Override
+    public synchronized void joinGroup(int userId) throws RemoteException{
+          
+			
+			Database.joinGroup(userId);    	        
+		   ChatClient client = activeClients.get(userId);
+			if(client != null){
+				clients.put(String.valueOf(userId),client);
+				}
+				System.out.println("User"+ userId + "Joined GroupForum");
+			}
+      //broadcast(new Message("Server", username + " joined the chat"));
+     }
 
 //    @Override
 //    public synchronized void leave(String username)
@@ -150,4 +162,3 @@ public class ChatServerImpl implements ChatServer {
 //            history.addAll((List<Message>) in.readObject());
 //        } catch (IOException | ClassNotFoundException ignored) {}
 //    }
-}

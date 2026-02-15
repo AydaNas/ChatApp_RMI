@@ -40,7 +40,7 @@ public class Database{
     	
     	stat.execute("""     			
     			  CREATE TABLE IF NOT EXISTS groups( 
-                  groupId INT AUTO_INCREMENT PRIMARY KEY,
+                  groupId INT PRIMARY KEY,
                   groupName VARCHAR(50) NOT NULL)
     			""");
     	
@@ -58,6 +58,25 @@ public class Database{
     	  e.printStackTrace();
       }
     }
+
+//Create Group called Group Forum if it doesnt exist when initializing the server
+
+public static void createGroup(){
+	int GroupId= 1;
+	String Groupname = "GroupForum";
+
+	try {
+		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+		String insertsql = "MERGE INTO groups (groupId,groupName) KEY(groupId) VALUES (?,?)";
+		PreparedStatement prepared = connection.prepareStatement(insertsql);
+		prepared = connection.prepareStatement(insertsql,Statement.RETURN_GENERATED_KEYS);
+	    prepared.setInt(1, GroupId);
+		prepared.setString(2,Groupname);
+		prepared.executeUpdate();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+}
     
     //Registering user to the database
     public static int registerClient(String username,String password) {
@@ -215,6 +234,36 @@ public class Database{
 	   e.printStackTrace();
    }
    return -1;
+   }
+
+
+   //Inserting user to Group Forum 
+
+   public static void joinGroup (int userId){
+	String alreadyExist = "SELECT * FROM groupMembers WHERE groupId = 1 AND userId = ?";
+	String query = "INSERT INTO groupMemebr (groupId,userId) VALUES = (1,?) ";
+	try {
+		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+		PreparedStatement checkAlreadyExist = connection.prepareStatement(query);
+		checkAlreadyExist.setInt(1,userId);
+		ResultSet result = checkAlreadyExist.executeQuery();
+        
+
+		if(!result.next()){
+		PreparedStatement prepared = connection.prepareStatement(query);
+ 
+		prepared.setInt(1,userId);
+		prepared.executeUpdate();
+		
+		System.out.println("Joined Group Successfully");
+		}
+		else{
+			System.out.println("user is already in the group");
+		}
+		
+	} catch (Exception e) {
+	}
+
    }
 }
     

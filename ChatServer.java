@@ -12,8 +12,10 @@ public interface ChatServer extends Remote {
   public void logoutUser(int userId) throws RemoteException;
   public List<Message> chatHistory(int userId) throws RemoteException;
 
-  
-//  public void join(String userName, ChatClient client) throws RemoteException;
+
+
+
+ public void joinGroup(int userId) throws RemoteException;
 //
 //  public void leave(String userName) throws RemoteException;
 //  
