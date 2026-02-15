@@ -143,7 +143,7 @@ public class ClientMain {
 				System.out.println("Welcome to GroupForum");
                 break;
 
-
+               //Logging out
          	   case 4: 
          		   System.out.println("Logging out");
          		   server.logoutUser(client.getUserId());
@@ -168,7 +168,9 @@ public class ClientMain {
 				switch(groupchoice){
                     case 1: break;
 					case 2: break;
-					case 3: 				
+
+					//Leave the group
+					case 3: 		
 
 					System.out.println("Are you sure you want to leave the group?");
 					System.out.println("press 0 to confirm , 1 to cancel");
