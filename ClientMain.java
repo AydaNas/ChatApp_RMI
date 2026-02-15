@@ -164,10 +164,27 @@ public class ClientMain {
 				System.out.println("Enter 4 to Back to Main Menu");
 
 				int groupchoice = input.nextInt();
+				input.nextLine();
 				switch(groupchoice){
                     case 1: break;
 					case 2: break;
-					case 3: break;
+					case 3: 				
+
+					System.out.println("Are you sure you want to leave the group?");
+					System.out.println("press 0 to confirm , 1 to cancel");
+					int confirm = input.nextInt();
+					input.nextLine();
+					if(confirm == 0){
+                     server.leaveGroup(client.getUserId());
+					 System.out.println("you have left the group");
+					 Joined = false;
+					}
+					else {
+						System.out.println("you are still in the group");
+
+					}
+				break;
+
 					case 4: 
 					System.out.print("Returning...");
 					Joined = false;

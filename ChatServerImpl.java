@@ -5,7 +5,10 @@ import java.util.*;
 
 
 public class ChatServerImpl implements ChatServer {
+	
     private final Map<Integer, ChatClient>activeClients = new HashMap();
+	private final Map<String, ChatClient> clients = new HashMap<>();
+    private final List<Message> history = new ArrayList<>();
 
 	// public ChatServerImpl() throws RemoteException {
     //     super(8082);  // let RMI manage properly
@@ -88,8 +91,7 @@ public class ChatServerImpl implements ChatServer {
 	 }
 
 
-    private final Map<String, ChatClient> clients = new HashMap<>();
-    private final List<Message> history = new ArrayList<>();
+  
     //private static final String HISTORY_FILE = "history.ser";
 
 //    public ChatServerImpl() throws RemoteException {
@@ -110,16 +112,26 @@ public class ChatServerImpl implements ChatServer {
 				System.out.println("User"+ userId + "Joined GroupForum");
 			}
       //broadcast(new Message("Server", username + " joined the chat"));
-     }
+     
 
-//    @Override
-//    public synchronized void leave(String username)
-//            throws RemoteException {
-//    	//delete the client from the group table 
-//        clients.remove(username);
-//        broadcast(new Message("Server", username + " left the chat"));
-//    }
 
+//leave Group 
+
+@Override
+    public synchronized void leaveGroup(int userId) throws RemoteException{
+          
+			
+		Database.leaveGroup(userId);    	        
+		   ChatClient client = activeClients.get(userId);
+			if(client != null){
+				clients.remove(String.valueOf(userId),client);
+				}
+				System.out.println("User"+ userId + "Joined GroupForum");
+			}
+      //broadcast(new Message("Server", username + " joined the chat"));
+     
+
+}
     
 
 //    @Override

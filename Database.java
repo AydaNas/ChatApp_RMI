@@ -240,27 +240,47 @@ public static void createGroup(){
    //Inserting user to Group Forum 
 
    public static void joinGroup (int userId){
-	String alreadyExist = "SELECT * FROM groupMembers WHERE groupId = 1 AND userId = ?";
-	String query = "INSERT INTO groupMemebr (groupId,userId) VALUES = (1,?) ";
+	int groupId = 1;
+	String query = "MERGE INTO groupMemebr (groupId,userId) VALUES = (?,?) ";
 	try {
 		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
 		PreparedStatement checkAlreadyExist = connection.prepareStatement(query);
-		checkAlreadyExist.setInt(1,userId);
-		ResultSet result = checkAlreadyExist.executeQuery();
-        
-
-		if(!result.next()){
 		PreparedStatement prepared = connection.prepareStatement(query);
- 
-		prepared.setInt(1,userId);
+ 		prepared.setInt(1,userId);
 		prepared.executeUpdate();
 		
 		System.out.println("Joined Group Successfully");
-		}
-		else{
-			System.out.println("user is already in the group");
-		}
 		
+		
+	} catch (Exception e) {
+	}
+
+   }
+
+
+
+   //Inserting user to Group Forum 
+
+   public static void leaveGroup (int userId){
+	//String alreadyExist = "SELECT * FROM groupMembers WHERE groupId =  AND userId = ?";
+	int groupId = 1;
+	String deletequery = "DELETE FROM groupMembers WHERE (groupId = ?) AND (userId = ?) ";
+	try {
+		connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+        PreparedStatement prepared = connection.prepareStatement(deletequery);
+ 
+		prepared.setInt(1,groupId);
+		prepared.setInt(2,userId);
+		int rows = prepared.executeUpdate();
+       
+	   if(rows> 0){
+		System.out.println("User" + userId + "has left the group");
+	   }
+	   else {
+		System.out.println("User" + userId + "the user doesnt exist");
+	   }
+
+	
 	} catch (Exception e) {
 	}
 
