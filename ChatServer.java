@@ -18,6 +18,7 @@ public interface ChatServer extends Remote {
  public void joinGroup(int userId) throws RemoteException;
  public void leaveGroup(int userId) throws RemoteException;
  
+ public void sendGroupMessage(int senderId,String content) throws RemoteException;
 //  public void showHistory() throws RemoteException;
 //
 //  public List<String> getJoinedUsers() throws RemoteException;

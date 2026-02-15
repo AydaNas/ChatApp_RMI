@@ -251,6 +251,7 @@ public static void createGroup(){
 		ifexist.setInt(2,userId);
 	
 		ResultSet result = ifexist.executeQuery();
+		
 		if(!result.next()){
 			String insertsql = "INSERT INTO groupMembers (groupId, userId) VALUES (?,?)";
 			PreparedStatement prepared = connection.prepareStatement(insertsql);
@@ -300,5 +301,46 @@ public static void createGroup(){
 	}
 
    }
+
+//send Group Message
+public static List<Message> getGroupMessage (int groupId){
+	List<Message> messages = new ArrayList<>();
+	try {
+		Connection connection = DriverManager.getConnection(dbName,userName,Dbpassword);
+		String query = "SELECT senderId,content,timeStamp FROM messages WHERE groupId = ? ORDER BY timeStamp ASC";
+		PreparedStatement prepared = connection.prepareStatement(query);
+		prepared.setInt(1,groupId);
+		ResultSet result = prepared.executeQuery();
+		while(result.next()){
+			int senderId = result.getInt("SenderId");
+			String content = result.getString("content");
+			Timestamp timestamp = result.getTimestamp("timestamp");
+			messages.add(new Message(senderId,null,content,timestamp));
+		}
+	} catch (SQLException e) {
+              e.printStackTrace();
+	}
+	return messages;
+}
+// Get all user IDs in a group
+public static List<Integer> getGroupMembers(int groupId) {
+    List<Integer> members = new ArrayList<>();
+    try {
+        connection = DriverManager.getConnection(dbName, userName, Dbpassword);
+        String query = "SELECT userId FROM groupMembers WHERE groupId = ?";
+        prepared = connection.prepareStatement(query);
+        prepared.setInt(1, groupId);
+        ResultSet rs = prepared.executeQuery();
+
+        while (rs.next()) {
+            members.add(rs.getInt("userId"));
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return members;
+}
+
+
 }
     

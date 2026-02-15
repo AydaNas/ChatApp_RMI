@@ -166,7 +166,12 @@ public class ClientMain {
 				int groupchoice = input.nextInt();
 				input.nextLine();
 				switch(groupchoice){
-                    case 1: break;
+					//Enter group Message
+                    case 1: 
+					System.out.println("Enter Group Message");
+					String groupMessage = input.nextLine();
+					server.sendGroupMessage(client.getUserId(), groupMessage);
+					break;
 					case 2: break;
 
 					//Leave the group

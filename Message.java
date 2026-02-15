@@ -4,12 +4,12 @@ import java.sql.Timestamp;
 
 public class Message implements Serializable {
     private final int senderId;
-    private final int receiverId;
+    private final Integer receiverId;
     private final String content;
     private final Timestamp timestamp;
  
    
-    public Message(int senderId,int receiverId, String content, Timestamp timestamp) {
+    public Message(int senderId, Integer receiverId, String content, Timestamp timestamp) {
         this.senderId = senderId;
         this.receiverId =receiverId;
         this.content = content;

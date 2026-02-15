@@ -27,7 +27,11 @@ public class ChatClientImpl extends UnicastRemoteObject implements ChatClient {
     
     @Override
     public void receiveMessage(Message message) throws RemoteException {
-       messagequeue.add(message); }
+       messagequeue.add(message);
+       System.out.println("\n [NEW MESSAGE] From"+
+       message.getSender()+message.getContent());
+       
+        }
     
     public void printReceivedMessages() {
         Message message;

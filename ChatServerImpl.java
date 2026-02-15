@@ -5,7 +5,7 @@ import java.util.*;
 
 
 public class ChatServerImpl implements ChatServer {
-	
+
     private final Map<Integer, ChatClient>activeClients = new HashMap();
 	private final Map<String, ChatClient> clients = new HashMap<>();
     private final List<Message> history = new ArrayList<>();
@@ -131,9 +131,34 @@ public class ChatServerImpl implements ChatServer {
       //broadcast(new Message("Server", username + " joined the chat"));
      
 
-}
-    
+ 
+//Send Group Message
+@Override
+public synchronized void sendGroupMessage(int senderId, String content) {
+    int groupId = 1;  // your group ID
+    Database.insertMessage(senderId, null, groupId, content);
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    Message message = new Message(senderId, null, content, timestamp);
 
+    // Get all users in the group
+    List<Integer> members = Database.getGroupMembers(groupId);
+
+    // Send message to each member if they are currently online
+    for (Integer memberId : members) {
+        ChatClient client = activeClients.get(memberId);
+        if (client != null) {
+            try {
+                client.receiveMessage(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    System.out.println("User " + senderId + " sent group message: " + content);
+}
+
+}
 //    @Override
 //    public synchronized List<Message> getHistory()
 //            throws RemoteException {
