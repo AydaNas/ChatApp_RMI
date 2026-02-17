@@ -35,7 +35,7 @@ public class ChatClientImpl extends UnicastRemoteObject implements ChatClient {
     
     public void printReceivedMessages() {
         Message message;
-        while ((message = messagequeue.poll()) != null) { // poll until queue is empty
+        while ((message = messagequeue.poll()) != null) { 
             System.out.println("[" + message.getTimestamp() + "] From User " + 
                                message.getSender() + ": " + message.getContent());
         }

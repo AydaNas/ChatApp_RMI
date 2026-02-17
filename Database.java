@@ -314,7 +314,7 @@ public static List<Message> getGroupMessage (int groupId){
 		while(result.next()){
 			int senderId = result.getInt("SenderId");
 			String content = result.getString("content");
-			Timestamp timestamp = result.getTimestamp("timestamp");
+			Timestamp timestamp = result.getTimestamp("timeStamp");
 			messages.add(new Message(senderId,null,content,timestamp));
 		}
 	} catch (SQLException e) {

@@ -157,7 +157,15 @@ public synchronized void sendGroupMessage(int senderId, String content) {
 
     System.out.println("User " + senderId + " sent group message: " + content);
 }
-
+@Override
+public List<Message> getGroupHistory(int userId) throws RemoteException{
+	int groupId = 1;
+	List<Integer>members = Database.getGroupMembers(groupId);
+	if(!members.contains(userId)){
+		return new ArrayList<>();
+	}
+	return Database.getGroupMessage(groupId);
+}
 }
 //    @Override
 //    public synchronized List<Message> getHistory()

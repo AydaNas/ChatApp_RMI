@@ -172,7 +172,14 @@ public class ClientMain {
 					String groupMessage = input.nextLine();
 					server.sendGroupMessage(client.getUserId(), groupMessage);
 					break;
-					case 2: break;
+					//Show group Chat History
+					case 2: 
+					List<Message>groupHistory = server.getGroupHistory(client.getUserId());
+					for(Message mes : groupHistory){
+						System.out.println("("+mes.getTimestamp()+") User" +
+						mes.getSender()+""+mes.getContent());
+					}
+					break;
 
 					//Leave the group
 					case 3: 		
