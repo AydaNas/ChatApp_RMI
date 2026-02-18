@@ -1,3 +1,5 @@
+package com.chatapp;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

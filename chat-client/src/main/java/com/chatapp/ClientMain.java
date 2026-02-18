@@ -1,7 +1,7 @@
+package com.chatapp;
+
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
-import static java.awt.SystemColor.text;
 
 public class ClientMain {
 
