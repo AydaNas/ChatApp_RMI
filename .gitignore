@@ -46,6 +46,10 @@ out/
 .DS_Store
 Thumbs.db
 
+### Database
+**/data/*.mv.db
+**/data/*.trace.db
+
 ############################
 # RMI generated / runtime files
 ############################

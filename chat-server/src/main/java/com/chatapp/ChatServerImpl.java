@@ -1,80 +1,112 @@
 package com.chatapp;
 
+import com.chatapp.db.DatabaseManager;
+
 import java.rmi.RemoteException;
 import java.util.*;
-import java.io.*;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ChatServerImpl implements ChatServer {
+    private final Map<String, Map<String, ChatClient>> chatRooms = new ConcurrentHashMap<>();
 
-    private final Map<String, ChatClient> clients = new HashMap<>();
-    private final List<Message> history = new ArrayList<>();
-    private static final String HISTORY_FILE = "history.ser";
-
-    public ChatServerImpl() throws RemoteException {
-        loadHistory();
+    @Override
+    public synchronized void createChat(String chatName) throws RemoteException {
+        chatRooms.putIfAbsent(chatName, new ConcurrentHashMap<>());
     }
 
     @Override
-    public synchronized void join(String username, ChatClient client)
+    public synchronized void joinChat(String chatName, String userName, ChatClient client)
             throws RemoteException {
-        clients.put(username, client);
-        broadcast(new Message("Server", username + " joined the chat"));
+
+        chatRooms.putIfAbsent(chatName, new ConcurrentHashMap<>());
+        chatRooms.get(chatName).put(userName, client);
     }
 
     @Override
-    public synchronized void leave(String username)
-            throws RemoteException {
-        clients.remove(username);
-        broadcast(new Message("Server", username + " left the chat"));
+    public synchronized void leaveChat(String chatName, String userName) throws RemoteException {
+        Map<String, ChatClient> clients = chatRooms.get(chatName);
+        if (clients != null) {
+            clients.remove(userName);
+        }
     }
 
     @Override
-    public synchronized void sendMessage(Message message)
-            throws RemoteException {
-        history.add(message);
-        saveHistory();
-        broadcast(message);
+    public List<String> listChats() throws RemoteException {
+        return new ArrayList<>(chatRooms.keySet());
     }
 
     @Override
-    public synchronized List<Message> getHistory()
-            throws RemoteException {
-        return new ArrayList<>(history);
-    }
-
-    @Override
-    public synchronized List<String> getJoinedUsers() {
-        return clients.keySet().stream().toList();
-    }
+    public void sendMessage(String chatName, Message message) throws RemoteException {
+        saveMessage(chatName, message);
 
 
-    private void broadcast(Message message) {
-        for (ChatClient client : clients.values()) {
-            try {
-                client.receiveMessage(message);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+        Map<String, ChatClient> clients = chatRooms.get(chatName);
+        if (clients != null) {
+            for (ChatClient client : clients.values()) {
+                try {
+                    client.receiveMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
+    @Override
+    public List<Message> getHistory(String chatName) throws RemoteException {
+        List<Message> history = new ArrayList<>();
 
-    private void saveHistory() {
-        try (ObjectOutputStream out =
-                     new ObjectOutputStream(new FileOutputStream(HISTORY_FILE))) {
-            out.writeObject(history);
-        } catch (IOException ignored) {}
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT sender, content FROM messages WHERE chat_name = ? ORDER BY id")) {
+
+            ps.setString(1, chatName);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                history.add(new Message(rs.getString("sender"), rs.getString("content")));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return history;
     }
 
-    @SuppressWarnings("unchecked")
-    private void loadHistory() {
-        File f = new File(HISTORY_FILE);
-        if (!f.exists()) return;
 
-        try (ObjectInputStream in =
-                     new ObjectInputStream(new FileInputStream(f))) {
-            history.addAll((List<Message>) in.readObject());
-        } catch (IOException | ClassNotFoundException ignored) {}
+    private void saveMessage(String chatName, Message message) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO messages (chat_name, sender, content) VALUES (?, ?, ?)")) {
+
+            ps.setString(1, chatName);
+            ps.setString(2, message.getSender());
+            ps.setString(3, message.getContent());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

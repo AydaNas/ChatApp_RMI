@@ -4,17 +4,22 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
-
 public interface ChatServer extends Remote {
 
-  public void sendMessage(Message message) throws RemoteException;
+  void createChat(String chatName) throws RemoteException;
 
-  public void join(String userName, ChatClient client) throws RemoteException;
+  void joinChat(String chatName, String userName, ChatClient client)
+          throws RemoteException;
 
-  public void leave(String userName) throws RemoteException;
+  void leaveChat(String chatName, String userName)
+          throws RemoteException;
 
-  public List<String> getJoinedUsers() throws RemoteException;
+  void sendMessage(String chatName, Message message)
+          throws RemoteException;
 
-  public List<Message> getHistory() throws RemoteException;
+  List<Message> getHistory(String chatName)
+          throws RemoteException;
 
+  List<String> listChats()
+          throws RemoteException;
 }
