@@ -1,14 +1,14 @@
 package com.chatapp;
 
 import com.chatapp.db.DatabaseManager;
-
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+
+
 
 public class ChatServerImpl implements ChatServer {
     private final Map<String, Map<String, ChatClient>> chatRooms = new ConcurrentHashMap<>();
@@ -41,18 +41,17 @@ public class ChatServerImpl implements ChatServer {
 
     @Override
     public void sendMessage(String chatName, Message message) throws RemoteException {
-        saveMessage(chatName, message);
-
-
-        Map<String, ChatClient> clients = chatRooms.get(chatName);
-        if (clients != null) {
-            for (ChatClient client : clients.values()) {
-                try {
+        try {
+            saveMessage(chatName, message);
+            Map<String, ChatClient> clients = chatRooms.get(chatName);
+            if (clients != null) {
+                for (ChatClient client : clients.values()) {
                     client.receiveMessage(message);
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException("Failed to send message", e);
         }
     }
 
@@ -66,20 +65,19 @@ public class ChatServerImpl implements ChatServer {
 
             ps.setString(1, chatName);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
-                history.add(new Message(rs.getString("sender"), rs.getString("content")));
+                history.add(new Message(
+                        rs.getString("sender"),
+                        rs.getString("content")));
             }
-
-        } catch (SQLException e) {
+            return history;
+        } catch (Exception e) {
             e.printStackTrace();
+            throw new RemoteException("Failed to fetch history", e);
         }
-
-        return history;
     }
 
-
-    private void saveMessage(String chatName, Message message) {
+    private void saveMessage(String chatName, Message message) throws Exception {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "INSERT INTO messages (chat_name, sender, content) VALUES (?, ?, ?)")) {
@@ -88,11 +86,10 @@ public class ChatServerImpl implements ChatServer {
             ps.setString(2, message.getSender());
             ps.setString(3, message.getContent());
             ps.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
+
+
 }
 
 

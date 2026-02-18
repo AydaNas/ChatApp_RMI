@@ -1,8 +1,8 @@
 package com.chatapp;
 
-import java.rmi.*;
-import java.rmi.server.*;
-import java.rmi.registry.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 
 public class Server {
