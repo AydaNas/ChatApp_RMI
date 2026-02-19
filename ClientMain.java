@@ -5,247 +5,246 @@ import java.util.Scanner;
 
 public class ClientMain {
 
+    private static int getIntInput(Scanner input) {
+        while (true) {
+            try {
+            return Integer.parseInt(input.nextLine());
+            } catch (NumberFormatException e) {
+            System.out.println("Enter a valid number:");
+            }
+        }
+    }
     public static void main(String[] args) throws Exception {
 
-    	Scanner input = new Scanner(System.in);
-    	String host = "127.0.0.1";
-    	int port = 8082;
-    	
+        Scanner input = new Scanner(System.in);
+        String host = "127.0.0.1";
+        int port = 8082;
 
         Registry registry = LocateRegistry.getRegistry(host, port);
         ChatServer server = (ChatServer) registry.lookup("ChatService");
         ChatClientImpl client = new ChatClientImpl();
-    
-        
-        boolean loogedIn = false;
-        boolean Joined = false;
-        
-       
-        while(true) {
-        	if(!loogedIn) {
-        		client.printReceivedMessages();       		
-        		
-        		System.out.println("Select your options");
-        		System.out.println("1 Register");
-        		System.out.println("2 Login");
-        		System.out.println("3 Exit");
-        		int choice = input.nextInt();
-        		input.nextLine();
-        		
-        		
-        		switch(choice) {
-        		   
-                //login and connection
-             	   case 1:
-             		   
-             		   System.out.println("Username: ");
-             		   String userName = input.nextLine();
 
-                        System.out.println("Password: ");
+        boolean loggedIn = false;
+        boolean joinedGroup = false;
+
+        while (true) {
+
+            if (!loggedIn) {
+
+                System.out.println("\n=== MAIN MENU ===");
+                System.out.println("1 Register");
+                System.out.println("2 Login");
+                System.out.println("3 Exit");
+
+                int choice = getIntInput(input);
+
+                switch (choice) {
+
+                    case 1:
+                        System.out.println("Username:");
+                        String username = input.nextLine();
+
+                        System.out.println("Password:");
                         String password = input.nextLine();
-                        
-                        int userId = server.registerClient(userName, password,client);
+
+                        int userId = server.registerClient(username, password, client);
                         client.setUserId(userId);
-                        break;                  
-                        
-                        
-                   //login
-             	   case 2: 
-             		   
-             		   System.out.println("Login");
-             		   System.out.println("UserName:");
-             		   String loginusername = input.nextLine();
-             		   System.out.println("Password:");
-             		   String loginpassword = input.nextLine();
-             		   
-             		   boolean sucess = server.loginUser(loginusername, loginpassword, client);
-             		   if(sucess) {
-             			   System.out.println("Login sucessful");
-             			   loogedIn = true;
-             		   }
-             		   else {
-             			   System.out.println("Login failed please try again");
-             			   loogedIn = false;
-             		   }  	   
-             	    break;
-                        
-             	   case 3:
-             		   System.out.println("Goodbye!");
-             		   System.exit(0);
-             		   break;
-             	  default:
-             		  System.out.println("Invalid Choice");
-        		}
-        	}
-        	else if (!Joined) {
-        		System.out.println("\n ===MAIN MENU===");
-        		System.out.println("1 send Message");
-        		System.out.println("2 Show History");
-        		System.out.println("3 Join Group");
-        		//System.out.println("4 Leave Group");
-				//System.out.println("5 Show History");
-				System.out.println("4 Logout");
-        		
-        		int choose = input.nextInt();
-        		input.nextLine();
-        		
-        		switch(choose) {
-        		//send Message     
-         	   case 1:
-         		
-         		   System.out.println("Active Users");
-                    
-                    List<UserList> users = server.getActiveUsers();
-                    for(UserList use : users) {
-                 	   System.out.println(use.getUserId()+""+use.getUserName());
-                    }
-                 	   System.out.println("Select person you want to chat with");
-                 	   int selection  = input.nextInt();
-                 	   input.nextLine();
-                 	   
-                 	   UserList selectedUser = null;
-                 	   for(UserList u:users) {
-                 		   if(u.getUserId() == selection) {
-                 			   selectedUser = u;
-                 			   break;
-                 		   }
-                 	   }
-                 	   if(selectedUser == null) {
-                 		   System.out.println("you havent selected user");
-                 		   break;
-                 	   }
-                 	   System.out.println("Enter message for user");
-                 	   String message = input.nextLine();
-                 	   
-                 	   server.sendMessage(client.getUserId(),selectedUser.getUserId(),null, message);
-                    System.out.println("Message sent");
-                    break;
-                    
-               
-         	  
-			   case 2: 
-			   System.out.println("Private Chat History");
-			   List<Message> history = server.chatHistory(client.getUserId());
 
-			    for(Message m : history){
-					System.out.println("("+m.getTimestamp()+")From"+
-					m.getSender()+"To"+
-					m.getReceiverId()+"Message"+
-					m.getContent());
-				}
-			   break;
+                        System.out.println("Registered successfully. Your ID: " + userId);
+                        break;
 
+                    case 2:
+                        System.out.println("Username:");
+                        String loginUser = input.nextLine();
 
-			    //Join Group
-         	   case 3:
-                server.joinGroup(client.getUserId());
-				Joined = true;
-				System.out.println("Welcome to GroupForum");
-                break;
+                        System.out.println("Password:");
+                        String loginPass = input.nextLine();
 
-               //Logging out
-         	   case 4: 
-         		   System.out.println("Logging out");
-         		   server.logoutUser(client.getUserId());
-				   loogedIn = false;
-         		   Joined = false;
-				   break;
-            
-         	  default:
-         		  System.out.println("you havent made any choice");
-                 
+                        boolean success = server.loginUser(loginUser, loginPass, client);
+
+                        if (success) {
+                            System.out.println("Login successful");
+                            loggedIn = true;
+                        } else {
+                            System.out.println("Login failed");
+                        }
+                        break;
+
+                    case 3:
+                        System.out.println("Goodbye!");
+                        System.exit(0);
+                        break;
+
+                    default:
+                        System.out.println("Invalid choice");
+                }
             }
-			}
-			
-			else {
-				System.out.println("Enter 1 to send Group Message");
-				System.out.println("Enter 2 to show Group chat history");
-				System.out.println("Enter 3 to leave the Group");
-				System.out.println("Enter 4 to Back to Main Menu");
 
-				int groupchoice = input.nextInt();
-				input.nextLine();
-				switch(groupchoice){
-					//Enter group Message
-                    case 1: 
-					System.out.println("Enter Group Message");
-					String groupMessage = input.nextLine();
-					server.sendGroupMessage(client.getUserId(), groupMessage);
-					break;
-					//Show group Chat History
-					case 2: 
-					List<Message>groupHistory = server.getGroupHistory(client.getUserId());
-					for(Message mes : groupHistory){
-						System.out.println("("+mes.getTimestamp()+") User" +
-						mes.getSender()+""+mes.getContent());
-					}
-					break;
+            else if (!joinedGroup) {
 
-					//Leave the group
-					case 3: 		
+                System.out.println("\n=== USER MENU ===");
+                System.out.println("1 Private Chat");
+                System.out.println("2 Show Private History");
+                System.out.println("3 Join Group");
+                System.out.println("4 Logout");
 
-					System.out.println("Are you sure you want to leave the group?");
-					System.out.println("press 0 to confirm , 1 to cancel");
-					int confirm = input.nextInt();
-					input.nextLine();
-					if(confirm == 0){
-                     server.leaveGroup(client.getUserId());
-					 System.out.println("you have left the group");
-					 Joined = false;
-					}
-					else {
-						System.out.println("you are still in the group");
+                int choice = getIntInput(input);
 
-					}
-				break;
+                switch (choice) {
 
-					case 4: 
-					System.out.print("Returning...");
-					Joined = false;
-					break;
+                    case 1:
 
-				}
-				
-			}
- //    
-        			
-        		}
-        		
+                        List<UserList> users = server.getActiveUsers();
+
+                        if (users.isEmpty()) {
+                            System.out.println("No users found.");
+                            break;
+                        }
+
+                        System.out.println("Active Users:");
+                        for (UserList u : users) {
+                            System.out.println(u.getUserId() + " - " + u.getUserName());
+                        }
+
+                        System.out.println("Select user ID:");
+                        int selectedId = getIntInput(input);
+
+                        UserList selectedUser = null;
+                        for (UserList u : users) {
+                            if (u.getUserId() == selectedId) {
+                                selectedUser = u;
+                                break;
+                            }
+                        }
+
+                        if (selectedUser == null) {
+                            System.out.println("Invalid user.");
+                            break;
+                        }
+
+                     
+                        System.out.println("Type /exit to leave");
+
+                        while (true) {
+
+                            String message = input.nextLine();
+
+                            if (message.equalsIgnoreCase("/exit")) {
+                                break;
+                            }
+
+                            server.sendMessage(
+                                    client.getUserId(),
+                                    selectedUser.getUserId(),
+                                    null,
+                                    message
+                            );
+                        }
+
+                        break;
+
+                    case 2:
+
+                        List<Message> history = server.chatHistory(client.getUserId());
+
+                        if (history.isEmpty()) {
+                            System.out.println("No messages.");
+                        }
+
+                        for (Message m : history) {
+                            System.out.println("(" + m.getTimestamp() + ") From "
+                                    + m.getSender() + " To "
+                                    + m.getReceiverId() + " : "
+                                    + m.getContent());
+                        }
+
+                        break;
+
+                    case 3:
+
+                        server.joinGroup(client.getUserId());
+                        joinedGroup = true;
+                        System.out.println("Joined GroupForum");
+                        break;
+
+                    case 4:
+
+                        server.logoutUser(client.getUserId());
+                        loggedIn = false;
+                        joinedGroup = false;
+                        System.out.println("Logged out");
+                        break;
+
+                    default:
+                        System.out.println("Invalid option");
+                }
+            }
+
+            else {
+
+                System.out.println("\n=== GROUP MENU ===");
+                System.out.println("1 Send Group Message");
+                System.out.println("2 Show Group History");
+                System.out.println("3 Leave Group");
+                System.out.println("4 Back");
+
+                int groupChoice = getIntInput(input);
+
+                switch (groupChoice) {
+
+                    case 1:
+
+                        System.out.println("=== Group Chat ===");
+                        System.out.println("Type /exit to leave");
+
+                        while (true) {
+
+                            String message = input.nextLine();
+
+                            if (message.equalsIgnoreCase("/exit")) {
+                                break;
+                            }
+
+                            server.sendGroupMessage(
+                                    client.getUserId(),
+                                    message
+                            );
+                        }
+
+                        break;
+
+                    case 2:
+
+                        List<Message> groupHistory =
+                                server.getGroupHistory(client.getUserId());
+
+                        if (groupHistory.isEmpty()) {
+                            System.out.println("No group messages.");
+                        }
+
+                        for (Message m : groupHistory) {
+                            System.out.println("(" + m.getTimestamp() + ") User " + m.getSender()+ " : "
+                                    + m.getContent());
+                        }
+
+                        break;
+
+                    case 3:
+
+                        server.leaveGroup(client.getUserId());
+                        joinedGroup = false;
+                        System.out.println("Left group");
+                        break;
+
+                    case 4:
+
+                        joinedGroup = false;
+                        break;
+
+                    default:
+                        System.out.println("Invalid option");
+                }
+            }
         }
-
-        	
-        
-           
-        
-              
-
-          
-
-            
-            
-            
-            
-            
-            //server.join(userName, client);
-
-//            for (Message m : server.getHistory()) {
-//                System.out.println(m);
-//            }
-//
-//            while (true) {
-//                String msg = System.console().readLine();
-//                if (msg.equalsIgnoreCase("q"))  {
-//                    break;
-//                };
-//
-//                server.sendMessage(new Message(userName, msg));
-//            }
-//
-//            server.leave(userName);
-
-      
     }
-    
- 
-    
-
+}

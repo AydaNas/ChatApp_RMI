@@ -99,7 +99,6 @@ public static void createGroup(){
     	
     	}
     	catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	return userId;
@@ -125,10 +124,9 @@ public static void createGroup(){
     	    }
     }
     
+      
     
-    
-    
-        //Get active users 
+        //Get active users using thte system
     public static List<UserList> getActiveusers() {
     	
     	List<UserList> users = new ArrayList<>();
@@ -152,14 +150,7 @@ public static void createGroup(){
     	System.out.print("list of active users");
 		return users;
 }
-    
-    
-    
-    
- 
-          
-    
-    //INSERTING MESSAGE IN TO THE DATABASE
+   //inserting messagesq to the databases
     public static void insertMessage(int senderId, Integer receiverId , Integer groupId, String content) {
     	Timestamp timestamp =new Timestamp (System.currentTimeMillis());
     
@@ -177,8 +168,7 @@ public static void createGroup(){
     	prepared.setTimestamp(5, timestamp);
     	prepared.executeUpdate();
     }
-		catch (SQLException e) {
-			// TODO Auto-generated catch block
+		catch (SQLException e) {		
 			e.printStackTrace();
 		}
 		}
@@ -273,8 +263,6 @@ public static void createGroup(){
 
    }
 
-
-
    //deleting the user from the Group Forum 
 
    public static void leaveGroup (int userId){
@@ -314,7 +302,7 @@ public static List<Message> getGroupMessage (int groupId){
 		while(result.next()){
 			int senderId = result.getInt("SenderId");
 			String content = result.getString("content");
-			Timestamp timestamp = result.getTimestamp("timeStamp");
+			Timestamp timestamp = result.getTimestamp("timestamp");
 			messages.add(new Message(senderId,null,content,timestamp));
 		}
 	} catch (SQLException e) {
