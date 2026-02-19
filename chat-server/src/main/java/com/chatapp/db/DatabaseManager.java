@@ -32,15 +32,13 @@ public class DatabaseManager {
                     chat_name VARCHAR(100),
                     sender VARCHAR(100),
                     content VARCHAR(1000),
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
             """);
-
-            System.out.println("H2 database initialized and connection pool ready!");
+            System.out.println("H2 database initialized, connection pool is ready!");
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to initialize database");
+            throw new RuntimeException("Failed to initialize the database");
         }
     }
 

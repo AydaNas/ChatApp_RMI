@@ -10,14 +10,12 @@ public class ClientMain {
                 System.out.println("Usage: java ClientMain <rmiregistry host> <rmiregistry port>");
                 return;
             }
-
             String host = args[0];
             int port = Integer.parseInt(args[1]);
-
             String username = JOptionPane.showInputDialog("Enter username:");
-            new ChatController(host, port, username);
 
-            } catch (Exception e) {
+            new ChatController(host, port, username);
+        } catch (Exception e) {
             System.err.println("Error on client: " + e);
             e.printStackTrace();
         }

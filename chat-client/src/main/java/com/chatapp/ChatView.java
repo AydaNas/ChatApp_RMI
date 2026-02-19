@@ -44,6 +44,7 @@ public class ChatView extends JFrame {
         bottomPanel.add(messageField, BorderLayout.CENTER);
         bottomPanel.add(sendButton, BorderLayout.EAST);
 
+
         add(bottomPanel, BorderLayout.SOUTH);
     }
 }
