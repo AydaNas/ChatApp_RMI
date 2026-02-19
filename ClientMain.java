@@ -121,7 +121,6 @@ public class ClientMain {
                             System.out.println("Invalid user.");
                             break;
                         }
-
                      
                         System.out.println("Type /exit to leave");
 
@@ -136,11 +135,10 @@ public class ClientMain {
                             server.sendMessage(
                                     client.getUserId(),
                                     selectedUser.getUserId(),
-                                    null,
+                                    
                                     message
                             );
                         }
-
                         break;
 
                     case 2:
@@ -153,7 +151,7 @@ public class ClientMain {
 
                         for (Message m : history) {
                             System.out.println("(" + m.getTimestamp() + ") From "
-                                    + m.getSender() + " To "
+                                    + m.getSenderId() + " To "
                                     + m.getReceiverId() + " : "
                                     + m.getContent());
                         }
@@ -192,26 +190,20 @@ public class ClientMain {
 
                 switch (groupChoice) {
 
-                    case 1:
+                    case 1: // Send group message
+    System.out.println("=== Group Chat ===");
+    System.out.println("Type /exit to leave");
 
-                        System.out.println("=== Group Chat ===");
-                        System.out.println("Type /exit to leave");
-
-                        while (true) {
-
-                            String message = input.nextLine();
-
-                            if (message.equalsIgnoreCase("/exit")) {
-                                break;
-                            }
-
-                            server.sendGroupMessage(
-                                    client.getUserId(),
-                                    message
-                            );
-                        }
-
-                        break;
+    while (true) {
+        String message = input.nextLine();
+        if (message.equalsIgnoreCase("/exit")) {
+            break;
+        }
+          server.sendGroupMessage(client.getUserId(), message);
+        
+        
+    }
+    break;
 
                     case 2:
 
@@ -223,7 +215,7 @@ public class ClientMain {
                         }
 
                         for (Message m : groupHistory) {
-                            System.out.println("(" + m.getTimestamp() + ") User " + m.getSender()+ " : "
+                            System.out.println("(" + m.getTimestamp() + ") User " + m.getSenderId()+ " : "
                                     + m.getContent());
                         }
 

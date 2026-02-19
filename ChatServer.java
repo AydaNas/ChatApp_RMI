@@ -6,19 +6,19 @@ import java.util.List;
 public interface ChatServer extends Remote {
   
   public  List<UserList> getActiveUsers() throws RemoteException;
-  public void sendMessage(int senderId, Integer reciverId, Integer groupId, String content) throws RemoteException;
+  //public void sendMessage(int senderId, Integer reciverId, Integer groupId, String content) throws RemoteException;
   public boolean loginUser(String username,String password, ChatClient client) throws RemoteException;
   public int registerClient(String username,String password, ChatClient client) throws RemoteException;
   public void logoutUser(int userId) throws RemoteException;
   public List<Message> chatHistory(int userId) throws RemoteException;
 
-
-
+  
+public void sendGroupMessage(int senderId, String content) throws RemoteException;
 
  public void joinGroup(int userId) throws RemoteException;
  public void leaveGroup(int userId) throws RemoteException;
  
- public void sendGroupMessage(int senderId,String content) throws RemoteException;
+public void sendMessage(int senderId, Integer receiverId, String content) throws RemoteException;
 public List<Message> getGroupHistory(int userId) throws RemoteException;
 //
 //  public List<String> getJoinedUsers() throws RemoteException;

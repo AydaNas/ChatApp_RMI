@@ -29,7 +29,7 @@ public class ChatClientImpl extends UnicastRemoteObject implements ChatClient {
     public void receiveMessage(Message message) throws RemoteException {
        messagequeue.add(message);
        System.out.println("\n [NEW MESSAGE] From"+
-       message.getSender()+message.getContent());
+       message.getSenderId()+message.getContent());
        
         }
     
@@ -37,7 +37,7 @@ public class ChatClientImpl extends UnicastRemoteObject implements ChatClient {
         Message message;
         while ((message = messagequeue.poll()) != null) { 
             System.out.println("[" + message.getTimestamp() + "] From User " + 
-                               message.getSender() + ": " + message.getContent());
+                               message.getSenderId() + ": " + message.getContent());
         }
     }
 

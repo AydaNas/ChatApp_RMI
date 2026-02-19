@@ -63,22 +63,24 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServer {
     }
 	//send private Messages
 
-    @Override
-    public synchronized void sendMessage(int senderId,Integer receiverId,Integer groupId,String content)
-            throws RemoteException {
-
-        Database.insertMessage(senderId, receiverId, groupId, content);
-        Timestamp timestamp =Timestamp.valueOf(LocalDateTime.now());
-        Message message =new Message(senderId, receiverId, content, timestamp);
-
-        // deliver if receiver is online
-        ChatClient receiver =activeClients.get(receiverId);
-
-        if (receiver != null) {
-            receiver.receiveMessage(message);
-        }
-        System.out.println("Private message from "+ senderId + " to "+ receiverId + " : " + content);
+   @Override
+public synchronized void sendMessage(int senderId, Integer receiverId, String content) throws RemoteException {
+    if (receiverId == null) {
+        throw new IllegalArgumentException("receiverId cannot be null for private messages");
     }
+
+    Database.insertMessage(senderId, receiverId, null, content);
+    Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+    Message message = new Message(senderId, receiverId, null, content, timestamp);
+
+    ChatClient receiver = activeClients.get(receiverId);
+    if (receiver != null) {
+        receiver.receiveMessage(message);
+    }
+
+    System.out.println("Private message from " + senderId + " to " + receiverId + " : " + content);
+}
+
 
     @Override
     public List<Message> chatHistory(int userId)throws RemoteException {
@@ -99,31 +101,44 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServer {
         System.out.println("User "+ userId+ " left GroupForum");
     } 
 
-    @Override
-    public synchronized void sendGroupMessage(int senderId,String content)throws RemoteException {
+   @Override
+public synchronized void sendGroupMessage(int senderId, String content) throws RemoteException {
+    int groupId = 1;
 
-        int groupId = 1;
-        Database.insertMessage(senderId,null,groupId,content);
-        Timestamp timestamp =new Timestamp(System.currentTimeMillis());
+    // Check if sender is in the group
+    List<Integer> members = Database.getGroupMembers(groupId);
+    if (!members.contains(senderId)) {
+        System.out.println("User " + senderId + " is not in the group. Message not sent.");
+        return;
+    }
 
-        Message message =new Message(senderId,null,content,timestamp);
+    Database.insertMessage(senderId, null, groupId, content);
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    Message message = new Message(senderId, null, groupId, content, timestamp);
 
-        for (Map.Entry<Integer, ChatClient> entry: activeClients.entrySet()) {
+    // Only send to online members in the group
+    for (Integer userId : members) {
+        ChatClient client = activeClients.get(userId);
+        if (client != null) {
             try {
-                entry.getValue().receiveMessage(message);
-            } 
-			catch (RemoteException e) {
+                client.receiveMessage(message);
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
-
-        System.out.println("Group message from "+ senderId + " : " + content);
     }
+
+    System.out.println("Group message from " + senderId + " : " + content);
+}
 
     @Override
-    public List<Message> getGroupHistory(int userId)throws RemoteException {
-
-        int groupId = 1;
-        return Database.getGroupMessage(groupId);
+public List<Message> getGroupHistory(int userId) throws RemoteException {
+    int groupId = 1;
+    List<Integer> members = Database.getGroupMembers(groupId);
+    if (!members.contains(userId)) {
+        return new ArrayList<>(); 
     }
+    return Database.getGroupMessage(groupId);
+}
+
 }

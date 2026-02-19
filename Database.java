@@ -194,7 +194,7 @@ public static void createGroup(){
     			int receiverId = result.getInt("receiverId");
     			String content = result.getString("content");
     			Timestamp timestamp = result.getTimestamp("timeStamp"); 
-    			messages.add(new Message(senderId,receiverId,content,timestamp));
+    			messages.add(new Message(senderId,receiverId,null,content,timestamp));
     		}
     	}
     		catch(SQLException e) {
@@ -303,7 +303,7 @@ public static List<Message> getGroupMessage (int groupId){
 			int senderId = result.getInt("SenderId");
 			String content = result.getString("content");
 			Timestamp timestamp = result.getTimestamp("timestamp");
-			messages.add(new Message(senderId,null,content,timestamp));
+			messages.add(new Message(senderId,null,groupId,content,timestamp));
 		}
 	} catch (SQLException e) {
               e.printStackTrace();
