@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 public class Message implements Serializable {
     private final int senderId;
     private final Integer receiverId;
-    private final Integer groupId; // <-- add this
+    private final Integer groupId; 
     private final String content;
     private final Timestamp timestamp;
 
